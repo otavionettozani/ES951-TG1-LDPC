@@ -76,9 +76,7 @@ int main(){
 
 	e_platform_t platform;
 	e_epiphany_t dev;
-	e_mem_t memory;
 
-	e_return_stat_t result;
 
 	unsigned read_buffer[RAM_SIZE/4];
 	unsigned read_data;
@@ -92,20 +90,43 @@ int main(){
 	struct timeval initTime, endTime;
 	long int timediff;
 
+	FILE* sparseMatrix = fopen("../H.txt", "r");
+    short *matrix = (short*) malloc (H_MATRIX_SIZE*sizeof(short));
+
+	//read matrix H
+    int line, col, lastLine = 1, ignore, read_scan;
+    for(i=0; i<H_MATRIX_SIZE; i++){
+		read_scan = fscanf(sparseMatrix, "%d %d %d",&col,&line, &ignore);
+		if(read_scan != 3){
+			matrix[i] = -1;
+			continue;
+		}
+		if(line!=lastLine){
+			matrix[i]=-1;
+			i++;
+			lastLine=line;
+		}
+		matrix[i]=col;
+    }
+
+	//initialize the cores
 	e_init(NULL);
 	e_get_platform_info(&platform);
 
 	clearMemory();
 
-	//clearFlags();
-
 	e_open(&dev, 0,0,4,4);
+
+	//copy the matrix to the cores memory
+	int copyMatrixSize=H_MATRIX_SIZE/16;
+	int offsetOfMatrix = 0;
 	for(i = 0; i<4; i++){
 		for(j=0; j<4; j++){
-
-			e_reset_group(&dev);
-			e_load("epiphanyProgram.srec",&dev,i,j,E_TRUE);
-			usleep(20000);
+			if(i==3 && j==3){
+				copyMatrixSize = H_MATRIX_SIZE - 15*copyMatrixSize;
+			}
+			e_write(&dev,i,j,COMMADDRESS_MATRIX,&matrix[offsetOfMatrix],copyMatrixSize*sizeof(short));
+			offsetOfMatrix+=copyMatrixSize;
 		}
 	}
 
@@ -133,6 +154,8 @@ int main(){
 	e_close(&dev);
 	e_finalize();
 
+
+	free(matrix);
 	return EXIT_SUCCESS;
 
 }
