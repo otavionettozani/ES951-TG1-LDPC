@@ -90,6 +90,9 @@ int main(void){
 	char lastCore;
 	int lastElement;
 
+	char lastCoreInternal;
+	int lastElementInternal;
+
 	//set the pointer to their variables
 	ready = (char*)(COMMADDRESS_READY);
 	inputData = (char*)(COMMADDRESS_INPUT);
@@ -97,7 +100,13 @@ int main(void){
 	dataCounter = (char*)(COMMADDRESS_COUNTER);
 
 	int i;
-
+    short element = -1;
+    short internalElement=-1;
+    char parityCheck = 0;
+    unsigned char bitPosition;
+    unsigned int bytePosition;
+    unsigned char selectedBit;
+    unsigned char bitValue;
 
 
 	while(1){
@@ -105,27 +114,51 @@ int main(void){
 
 		lastCore = -1;
 		lastElement = -1;
+		element = -1;
+		parityCheck = 0;
+
+		lastCoreInternal = -1;
+		lastElementInternal = -1;
+		internalElement = -1;
 
 		while(!(*ready));
 
-        short element = -1;
-        char parityCheck = 0;
-        unsigned char bitPosition;
-        unsigned int bytePosition;
-        unsigned char selectedBit;
+
         while(1){
+
+
             element = getNextElement(&lastCore,&lastElement);
             if(element == 0){
+                //go to correction code
                 break;
+            }else if(element == -1){
+                //finish line parity check
+                internalElement = getNextElement(&lastCoreInternal,&lastElementInternal);
+                while(internalElement!= (short)-1){
+                    bitPosition = internalElement%8;
+                    bytePosition = internalElement/8;
+                    selectedBit = 1<<bitPosition;
+                    bitValue = (selectedBit&inputData[bytePosition])>>bitPosition;
+
+                    dataCounter[internalElement] += parityCheck?(!bitValue - bitValue) : (bitValue - !bitValue);
+                    internalElement = getNextElement(&lastCoreInternal,&lastElementInternal);
+
+                }
+                parityCheck = 0;
+
+            }else{
+                //line parity check
+                bitPosition = element%8;
+                bytePosition = element/8;
+                selectedBit = 1<<bitPosition;
+
+                parityCheck ^= (selectedBit&inputData[bytePosition])>>bitPosition;
             }
-            bitPosition = element%8;
-            bytePosition = element/8;
-            selectedBit = 1<<bitPosition;
-
-            parityCheck ^= (selectedBit&inputData[bytePosition])>>bitPosition;
-
 
         }
+
+        //create the new message to redo the algorithm.
+
 
 		*ready = 0;
 
