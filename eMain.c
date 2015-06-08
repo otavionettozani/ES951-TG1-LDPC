@@ -6,65 +6,108 @@
 
 #include "messages.h"
 
+short getNextElement (char* lastCore, int* lastCoreElement){
+	int coreMatrixS[16] = {CORE_0_0_MEM+COMMADDRESS_MATRIX,
+		CORE_0_1_MEM+COMMADDRESS_MATRIX,
+		CORE_0_2_MEM+COMMADDRESS_MATRIX,
+		CORE_0_3_MEM+COMMADDRESS_MATRIX,
+		CORE_1_0_MEM+COMMADDRESS_MATRIX,
+		CORE_1_1_MEM+COMMADDRESS_MATRIX,
+		CORE_1_2_MEM+COMMADDRESS_MATRIX,
+		CORE_1_3_MEM+COMMADDRESS_MATRIX,
+		CORE_2_0_MEM+COMMADDRESS_MATRIX,
+		CORE_2_1_MEM+COMMADDRESS_MATRIX,
+		CORE_2_2_MEM+COMMADDRESS_MATRIX,
+		CORE_2_3_MEM+COMMADDRESS_MATRIX,
+		CORE_3_0_MEM+COMMADDRESS_MATRIX,
+		CORE_3_1_MEM+COMMADDRESS_MATRIX,
+		CORE_3_2_MEM+COMMADDRESS_MATRIX,
+		CORE_3_3_MEM+COMMADDRESS_MATRIX};
+	
+	int coreSizeS[16] = {CORE_0_0_MEM+COMMADDRESS_SIZE,
+		CORE_0_1_MEM+COMMADDRESS_SIZE,
+		CORE_0_2_MEM+COMMADDRESS_SIZE,
+		CORE_0_3_MEM+COMMADDRESS_SIZE,
+		CORE_1_0_MEM+COMMADDRESS_SIZE,
+		CORE_1_1_MEM+COMMADDRESS_SIZE,
+		CORE_1_2_MEM+COMMADDRESS_SIZE,
+		CORE_1_3_MEM+COMMADDRESS_SIZE,
+		CORE_2_0_MEM+COMMADDRESS_SIZE,
+		CORE_2_1_MEM+COMMADDRESS_SIZE,
+		CORE_2_2_MEM+COMMADDRESS_SIZE,
+		CORE_2_3_MEM+COMMADDRESS_SIZE,
+		CORE_3_0_MEM+COMMADDRESS_SIZE,
+		CORE_3_1_MEM+COMMADDRESS_SIZE,
+		CORE_3_2_MEM+COMMADDRESS_SIZE,
+		CORE_3_3_MEM+COMMADDRESS_SIZE};
+	
+	short *coreMatrix[16];
+	int *coreSize[16];
+	
+	int i;
+	
+	for(i=0;i<16;i++){
+		coreMatrix[i] = (short*)coreMatrixS[i];
+		coreSize[i] = (int*)coreSizeS[i];
+	}
+	
+	
+	if(*lastCore==(char)-1 && *lastCoreElement==-1){
+		*lastCore = 0;
+		*lastCoreElement = 0;
+		
+		return (coreMatrix[0])[0];
+	}
+	
+	
+	int size = *(coreSize[*lastCore]);
+	
+	
+	if(*lastCoreElement>=size){
+		if(*lastCore == 16){
+			return 0;
+		}
+		(*lastCore)++;
+		size = *(coreSize[*lastCore]);
+		*lastCoreElement = 0;
+	}else{
+		(*lastCoreElement)++;
+	}
+	
+	return (coreMatrix[*lastCore])[*lastCoreElement];
+	
+}
 
 int main(void){
-
-
-	unsigned char *dataReceived;
-	unsigned int *size;
-	unsigned char *ack;
-	unsigned char *busy;
-	unsigned char *dataSent;
-	unsigned char *armAck;
-	unsigned int *data;
-
+	
+	
+	unsigned char *ready;
+	unsigned int *inputData;
+	unsigned char *outputData;
+	
+	char lastCore;
+	int lastElement;
+	
 	//set the pointer to their variables
-	size = (int*)(COMMADDRESS_SIZE);
-	ack = (char*)(COMMADDRESS_EPIPHANY_ACK);
-	dataReceived = (char*)(COMMADDRESS_DATA_TO_EPIPHANY);
-	busy = (char*)(COMMADDRESS_BUSY);
-	dataSent = (char*)(COMMADDRESS_DATA_TO_ARM);
-	armAck = (char*)(COMMADDRESS_ARM_ACK);
-	data = (int*)(COMMADDRESS_DATA+CORE_0_0_MEM);
-
-	//temporary
-	size[0] = e_get_coreid();
-	size[2] = data;
-	data[0] = e_get_coreid();
-
-	return EXIT_SUCCESS;
-
-	*dataSent = 0;
-	//set the core as busy
-	*busy = 1;
-	//wait for signal that all data has been transfered
-	while(!dataReceived[0]);
-	//acknowledge receiving the data
-	*ack = 1;
-	//reset receive data bit
-	*dataReceived = 0;
-
-//--------------
-//do all that matters
-
-
-//----------------
-
-
-	//up data sent flag
-	*dataSent = 1;
-	//down own ack
-
-	//wait for arm to ack
-	while(!armAck[0]);
-
-	*ack = 0;
-
-	//reset busy flag
-	*busy = 0;
-
-	*armAck = 0;
-
-
+	ready = (char*)(COMMADDRESS_READY);
+	inputData = (int*)(COMMADDRESS_INPUT);
+	outputData = (char*)(COMMADDRESS_OUTPUT);
+	
+	while(1){
+		
+		lastCore = -1;
+		lastElement = -1;
+		
+		while(!(*ready));
+		
+		while(getNextElement(&lastCore,&lastElement));
+		inputData[0] = lastCore;
+		inputData[8] = lastElement;
+		
+		
+		*ready = 0;
+		
+	}
+	
 	return EXIT_SUCCESS;
 }
