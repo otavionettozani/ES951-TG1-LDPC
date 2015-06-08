@@ -195,6 +195,7 @@ int main(void){
 
         for(i = 0; i<DATA_SIZE; i++){
             outputData[i] = inputData[i];
+            inputData[i] = 0;
         }
         //end of decoding
 		*ready = 0;

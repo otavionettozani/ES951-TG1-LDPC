@@ -9,7 +9,7 @@
 #define RAM_SIZE (0x8000)
 #define VECTOR_SIZE (524288)
 
-#define DATA_TO_SEND (32)
+#define DATA_TO_SEND (16)
 
 
 void clearMemory(){
@@ -104,7 +104,10 @@ int main(){
 
 	//create data
     for(i=0;i<DATA_TO_SEND;i++){
-        data[i][0] = 0x0f;
+        for(j=0;j<DATA_SIZE;j++){
+            data[i][j] = 0xff;
+        }
+
     }
 
 	//start programs
@@ -142,7 +145,7 @@ int main(){
 			lastStates[i][j]=1;
 			dataInCores[i][j] = lastSentData;
 			lastSentData++;
-
+            printf("Data Sent->%d\n",lastSentData);
 			//see if needs to read data
 		}else if(readReady == 0 && lastStates[i][j]==1){
 			//read data
@@ -153,12 +156,12 @@ int main(){
 			lastStates[i][j]=0;
 			receivedData++;
 
+            printf("Data Received ->%d\nTotal Received->%d\n",dataLocation,receivedData);
 			if(receivedData == DATA_TO_SEND){
 				break;
 			}
 		}
 
-		printf("%d,%d->%d\n",i,j,receivedData);
 
 		//update loop variables
 		j = i==3? (j==3 ? 0 : j+1): j;
