@@ -56,7 +56,7 @@ short getNextElement (char* lastCore, int* lastCoreElement){
 		*lastCore = 0;
 		*lastCoreElement = 0;
 
-		return (coreMatrix[0])[0x1230];
+		return (coreMatrix[0])[0];
 	}
 
 
@@ -108,7 +108,6 @@ int main(void){
     unsigned char selectedBit;
     unsigned char bitValue;
 
-
 	while(1){
 
 
@@ -128,6 +127,7 @@ int main(void){
 
 
             element = getNextElement(&lastCore,&lastElement);
+
             if(element == 0){
                 //go to correction code
                 break;
@@ -140,7 +140,7 @@ int main(void){
                     selectedBit = 1<<bitPosition;
                     bitValue = (selectedBit&inputData[bytePosition])>>bitPosition;
 
-                    dataCounter[internalElement] += parityCheck?(!bitValue - bitValue) : (bitValue - !bitValue);
+                    dataCounter[internalElement-1] -= parityCheck?(!bitValue - bitValue) : (bitValue - !bitValue);
                     internalElement = getNextElement(&lastCoreInternal,&lastElementInternal);
 
                 }
@@ -153,13 +153,19 @@ int main(void){
                 selectedBit = 1<<bitPosition;
 
                 parityCheck ^= (selectedBit&inputData[bytePosition])>>bitPosition;
+
+
+
             }
 
         }
 
         //create the new message to redo the algorithm.
 
-
+        inputData[0] = debugcounter;
+        inputData[1] = debugcounter>>8;
+        inputData[2] = debugcounter>>16;
+        inputData[3] = debugcounter>>24;
 		*ready = 0;
 
 	}
