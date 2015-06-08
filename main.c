@@ -103,7 +103,9 @@ int main(){
 	}
 
 	//create data
-
+    for(i=0;i<DATA_TO_SEND;i++){
+        data[i][0] = 0x0f;
+    }
 
 	//start programs
 	for(i=0; i<4; i++){
