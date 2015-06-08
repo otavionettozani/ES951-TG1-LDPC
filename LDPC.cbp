@@ -31,6 +31,18 @@
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
+		<Unit filename="Debug/logs.txt" />
+		<Unit filename="H.txt" />
+		<Unit filename="README.md" />
+		<Unit filename="build.sh" />
+		<Unit filename="eMain.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="main.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="messages.h" />
+		<Unit filename="run.sh" />
 		<Extensions>
 			<code_completion />
 			<debugger />
