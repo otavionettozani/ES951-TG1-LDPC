@@ -118,7 +118,7 @@ int main(){
         for(j=0;j<DATA_SIZE;j++){
             data[i][j] = originalData[j];
         }
-
+        data[i][0] ^= 0x01;
     }
 
 
@@ -157,7 +157,7 @@ int main(){
 			lastStates[i][j]=1;
 			dataInCores[i][j] = lastSentData;
 			lastSentData++;
-            printf("Data Sent->%d\n",lastSentData);
+            printf("Data Sent->%d Cores->%d,%d\n",lastSentData,i,j);
 			//see if needs to read data
 		}else if(readReady == 0 && lastStates[i][j]==1){
 			//read data
@@ -168,9 +168,9 @@ int main(){
 			lastStates[i][j]=0;
 			receivedData++;
 
-            printf("Data Received Core->%d\n",dataLocation+1);
-			if(receivedData >= DATA_TO_SEND/1.2){
-                usleep(10000);
+            printf("Data Received->%d Core->%d %d\n",dataLocation+1,i,j);
+			if(receivedData >= DATA_TO_SEND-3){
+                usleep(20000);
 				break;
 			}
 		}
@@ -205,9 +205,9 @@ int main(){
             }
         }
         if(test){
-            printf("error at core:%d\n",i);
+            printf("error at core:%d\n",i+1);
         }else{
-            printf("ok at:%d\n",i);
+            printf("ok at:%d\n",i+1);
         }
     }
 

@@ -273,8 +273,10 @@ int main(void){
 
                 char verifier = dataSignal(dataCounter,i,dataCounterSignal);
 
+
+
                 if(verifier == (char)0){
-                    inputData[bytePosition] &= selectedBit;
+                    //inputData[bytePosition] &= 0xff;
                 }else if(verifier == (char)-1){
                     inputData[bytePosition] &= (~selectedBit);
                 }else{
