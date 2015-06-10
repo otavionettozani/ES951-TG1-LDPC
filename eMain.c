@@ -137,8 +137,8 @@ int main(void){
                     //finish line parity check
                     internalElement = getNextElement(&lastCoreInternal,&lastElementInternal);
                     while(internalElement!= (short)-1){
-                        bitPosition = internalElement%8;
-                        bytePosition = internalElement/8;
+                        bitPosition = (internalElement-1)%8;
+                        bytePosition = (internalElement-1)/8;
                         selectedBit = 1<<bitPosition;
                         bitValue = (selectedBit&inputData[bytePosition])>>bitPosition;
 
@@ -150,13 +150,15 @@ int main(void){
 
                 }else{
                     //line parity check
-                    bitPosition = element%8;
-                    bytePosition = element/8;
+                    bitPosition = (element-1)%8;
+                    bytePosition = (element-1)/8;
                     selectedBit = 1<<bitPosition;
 
                     parityCheck ^= (selectedBit&inputData[bytePosition])>>bitPosition;
 
-                    algorithmEnd|=parityCheck;
+                    if(parityCheck){
+                        algorithmEnd = 1;
+                    }
 
                 }
 
@@ -166,7 +168,7 @@ int main(void){
             //if all parity is right break the decoding loop
             if(!algorithmEnd){
                 for(i=0; i<COUNTER_SIZE; i++){
-                    dataCounter[i] = 0;
+                    dataCounter[i] = 0x00;
                 }
                 break;
             }
@@ -187,9 +189,11 @@ int main(void){
                     inputData[bytePosition] |= selectedBit;
                 }
                 dataCounter[i] = 0;
-
             }
-
+            lastCore = -1;
+            lastElement = -1;
+            lastCoreInternal = -1;
+            lastElementInternal = -1;
 
         }
 
