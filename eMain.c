@@ -6,21 +6,42 @@
 
 #include "messages.h"
 
+char dataSignal(char* bytes, int halfBytePosition, char* signals){
+	int byteLoc1 = halfBytePosition/2;
+	int bitsLoc1 =((halfBytePosition%2)*4);
+	int bits1 =  0b1111<<bitsLoc1;
+
+	char mutab = (bytes[byteLoc1]&bits1)>>bitsLoc1;
+
+    int byteLoc2 = halfBytePosition/8;
+	int bitsLoc2 = 1<<(halfBytePosition%8);
+
+	if(mutab == 0){
+        return 0;
+	}else{
+        if(signals[byteLoc2] & (bitsLoc2)){
+            return -1;
+        }else{
+            return 1;
+        }
+	}
+}
+
 void addOneHalfByte(char* bytes, int halfBytePosition, char* signals, char add){
 	int byteLoc1 = halfBytePosition/2;
 	int bitsLoc1 =((halfBytePosition%2)*4);
 	int bitsRecover = (!(halfBytePosition%2))*4;
 	int bits1 =  0b1111<<bitsLoc1;
 	int bitsR = 0b1111<<bitsRecover;
-	
+
 	char recoverable = bytes[byteLoc1]&bitsR;
 	char mutab = (bytes[byteLoc1]&bits1)>>bitsLoc1;
-	
-	
+
+
 	int byteLoc2 = halfBytePosition/8;
 	int bitsLoc2 = 1<<(halfBytePosition%8);
-	
-	
+
+
 	if(mutab == 0){
 		mutab++;
 		if (add) {
@@ -28,15 +49,15 @@ void addOneHalfByte(char* bytes, int halfBytePosition, char* signals, char add){
 		}else{
 			signals[byteLoc2] = signals[byteLoc2] | (bitsLoc2);
 		}
-		
-		
+
+
 		recoverable = recoverable | (mutab<<bitsLoc1);
-		
+
 		bytes[byteLoc1] = recoverable;
-		
+
 		return;
 	}
-	
+
 	if (signals[byteLoc2]&bitsLoc2) {
 		//is negative
 		if (add) {
@@ -51,16 +72,16 @@ void addOneHalfByte(char* bytes, int halfBytePosition, char* signals, char add){
 		}else{
 			mutab--;
 		}
-		
+
 	}
-	
+
 	recoverable = recoverable | (mutab<<bitsLoc1);
-	
+
 	bytes[byteLoc1] = recoverable;
-	
+
 	return;
-	
-	
+
+
 }
 
 short getNextElement (char* lastCore, int* lastCoreElement){
@@ -187,6 +208,7 @@ int main(void){
 
                 element = getNextElement(&lastCore,&lastElement);
 
+
                 if(element == 0){
                     //go to correction code
                     break;
@@ -205,12 +227,14 @@ int main(void){
 						}else{
 							addOneHalfByte(dataCounter,internalElement-1,dataCounterSignal,bitValue);
 						}
-						
-						
+
+
                         internalElement = getNextElement(&lastCoreInternal,&lastElementInternal);
 
                     }
                     parityCheck = 0;
+
+
 
                 }else{
                     //line parity check
@@ -228,7 +252,6 @@ int main(void){
 
             }
 
-
             //if all parity is right break the decoding loop
             if(!algorithmEnd){
                 for(i=0; i<COUNTER_SIZE; i++){
@@ -245,9 +268,11 @@ int main(void){
                 bitPosition = i%8;
                 selectedBit = 1<<bitPosition;
 
-                if(dataCounter[i] == (char)0){
+                char verifier = dataSignal(dataCounter,i,dataCounterSignal);
+
+                if(verifier == (char)0){
                     inputData[bytePosition] &= selectedBit;
-                }else if(dataCounter[i]&0x80){
+                }else if(verifier == (char)-1){
                     inputData[bytePosition] &= (~selectedBit);
                 }else{
                     inputData[bytePosition] |= selectedBit;

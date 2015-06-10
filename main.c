@@ -55,7 +55,16 @@ int main(){
 	short *matrix = (short*) malloc (H_MATRIX_SIZE*sizeof(short));
 	char data[DATA_TO_SEND][DATA_SIZE];
 	char answer[DATA_TO_SEND][DATA_SIZE];
-	char originalData[DATA_SIZE] = {0};
+	FILE* entryData = fopen("../vector.txt", "r");
+	unsigned char originalData[DATA_SIZE] = {0};
+	int readOriginalData;
+    for(i=0; i<DATA_SIZE;i++){
+        fscanf(entryData,"%d",&readOriginalData);
+        originalData[i] = (char)readOriginalData;
+    }
+
+    fclose(entryData);
+
 
 	//control variables
 	char lastStates[4][4] = {{0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0}};
@@ -76,6 +85,8 @@ int main(){
 		}
 		matrix[i]=col;
 	}
+
+	fclose(sparseMatrix);
 
 	//initialize the cores
 	e_init(NULL);
@@ -105,7 +116,7 @@ int main(){
 	//create data
     for(i=0;i<DATA_TO_SEND;i++){
         for(j=0;j<DATA_SIZE;j++){
-            data[i][j] = 0x0f;//originalData[j];
+            data[i][j] = originalData[j];
         }
     }
 
@@ -171,8 +182,13 @@ int main(){
 
 
     for(i=0; i<DATA_SIZE; i++){
-        originalData[i] = answer[0][i];
-        fprintf(file,"0x%x,",answer[0][i]);
+        //originalData[i] = answer[0][i];
+        fprintf(file,"0x%04x,",answer[0][i]);
+    }
+    fprintf(file,"\n");
+    for(i=0; i<DATA_SIZE; i++){
+        //originalData[i] = answer[0][i];
+        fprintf(file,"0x%04x,",originalData[i]);
     }
     fprintf(file,"\n");
 
@@ -181,13 +197,13 @@ int main(){
         test = 0;
         for(j=0;j<DATA_SIZE;j++){
             if(answer[i][j]!=originalData[j]){
-                printf("%d ",j);
+                printf("wrong byte: %d->",j+1);
                 test=1;
                 break;
             }
         }
         if(test){
-            printf("error at:%d\n",i);
+            printf("error at core:%d\n",i);
         }else{
             printf("ok at:%d\n",i);
         }
