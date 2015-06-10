@@ -6,6 +6,63 @@
 
 #include "messages.h"
 
+void addOneHalfByte(char* bytes, int halfBytePosition, char* signals, char add){
+	int byteLoc1 = halfBytePosition/2;
+	int bitsLoc1 =((halfBytePosition%2)*4);
+	int bitsRecover = (!(halfBytePosition%2))*4;
+	int bits1 =  0b1111<<bitsLoc1;
+	int bitsR = 0b1111<<bitsRecover;
+	
+	char recoverable = bytes[byteLoc1]&bitsR;
+	char mutab = (bytes[byteLoc1]&bits1)>>bitsLoc1;
+	
+	
+	int byteLoc2 = halfBytePosition/8;
+	int bitsLoc2 = 1<<(halfBytePosition%8);
+	
+	
+	if(mutab == 0){
+		mutab++;
+		if (add) {
+			signals[byteLoc2] = signals[byteLoc2] & (~bitsLoc2);
+		}else{
+			signals[byteLoc2] = signals[byteLoc2] | (bitsLoc2);
+		}
+		
+		
+		recoverable = recoverable | (mutab<<bitsLoc1);
+		
+		bytes[byteLoc1] = recoverable;
+		
+		return;
+	}
+	
+	if (signals[byteLoc2]&bitsLoc2) {
+		//is negative
+		if (add) {
+			mutab--;
+		}else{
+			mutab++;
+		}
+	}else{
+		//is positive
+		if (add) {
+			mutab++;
+		}else{
+			mutab--;
+		}
+		
+	}
+	
+	recoverable = recoverable | (mutab<<bitsLoc1);
+	
+	bytes[byteLoc1] = recoverable;
+	
+	return;
+	
+	
+}
+
 short getNextElement (char* lastCore, int* lastCoreElement){
 	int coreMatrixS[16] = {CORE_0_0_MEM+COMMADDRESS_MATRIX,
 		CORE_0_1_MEM+COMMADDRESS_MATRIX,
@@ -142,7 +199,14 @@ int main(void){
                         selectedBit = 1<<bitPosition;
                         bitValue = (selectedBit&inputData[bytePosition])>>bitPosition;
 
-                        dataCounter[internalElement-1] += parityCheck?(!bitValue - bitValue) : (bitValue - !bitValue);
+                        //dataCounter[internalElement-1] += parityCheck?(!bitValue - bitValue) : (bitValue - !bitValue);
+						if (parityCheck) {
+							addOneHalfByte(dataCounter,internalElement-1,dataCounterSignal,!bitValue);
+						}else{
+							addOneHalfByte(dataCounter,internalElement-1,dataCounterSignal,bitValue);
+						}
+						
+						
                         internalElement = getNextElement(&lastCoreInternal,&lastElementInternal);
 
                     }
