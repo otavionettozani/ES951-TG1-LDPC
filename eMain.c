@@ -84,7 +84,7 @@ int main(void){
 
 	unsigned char *ready;
 	unsigned char *inputData;
-	unsigned char *outputData;
+	unsigned char *dataCounterSignal;
 	unsigned char *dataCounter;
 
 	char lastCore;
@@ -96,7 +96,7 @@ int main(void){
 	//set the pointer to their variables
 	ready = (char*)(COMMADDRESS_READY);
 	inputData = (char*)(COMMADDRESS_INPUT);
-	outputData = (char*)(COMMADDRESS_OUTPUT);
+	dataCounterSignal = (char*)(COMMADDRESS_COUNTER_SIGNAL);
 	dataCounter = (char*)(COMMADDRESS_COUNTER);
 
 	int i;
@@ -197,10 +197,6 @@ int main(void){
 
         }
 
-        for(i = 0; i<DATA_SIZE; i++){
-            outputData[i] = inputData[i];
-            inputData[i] = 0;
-        }
         //end of decoding
 		*ready = 0;
 
