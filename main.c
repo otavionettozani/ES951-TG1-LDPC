@@ -118,6 +118,7 @@ int main(){
         for(j=0;j<DATA_SIZE;j++){
             data[i][j] = originalData[j];
         }
+
     }
 
 
@@ -167,8 +168,9 @@ int main(){
 			lastStates[i][j]=0;
 			receivedData++;
 
-            printf("Data Received ->%d\nTotal Received->%d\n",dataLocation,receivedData);
-			if(receivedData == DATA_TO_SEND){
+            printf("Data Received Core->%d\n",dataLocation+1);
+			if(receivedData >= DATA_TO_SEND/1.2){
+                usleep(10000);
 				break;
 			}
 		}

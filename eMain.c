@@ -200,6 +200,7 @@ int main(void){
 		lastElementInternal = -1;
 		internalElement = -1;
 
+
 		while(!(*ready));
 
         while(1) {
@@ -213,6 +214,7 @@ int main(void){
                     //go to correction code
                     break;
                 }else if(element == -1){
+
                     //finish line parity check
                     internalElement = getNextElement(&lastCoreInternal,&lastElementInternal);
                     while(internalElement!= (short)-1){
@@ -232,6 +234,10 @@ int main(void){
                         internalElement = getNextElement(&lastCoreInternal,&lastElementInternal);
 
                     }
+
+                    if(parityCheck){
+                        algorithmEnd = 1;
+                    }
                     parityCheck = 0;
 
 
@@ -244,9 +250,6 @@ int main(void){
 
                     parityCheck ^= (selectedBit&inputData[bytePosition])>>bitPosition;
 
-                    if(parityCheck){
-                        algorithmEnd = 1;
-                    }
 
                 }
 
@@ -283,6 +286,7 @@ int main(void){
             lastElement = -1;
             lastCoreInternal = -1;
             lastElementInternal = -1;
+
 
         }
 
