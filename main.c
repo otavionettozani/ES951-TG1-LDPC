@@ -138,7 +138,8 @@ int main(){
 	char lastReadData =0;
 	char receivedData =0;
 	//TIME MEASUREMENT HERE
-
+    gettimeofday(&initTime,NULL);
+    timediff = initTime.tv_sec*1000000+initTime.tv_usec;
 	//loop to send data
 
 
@@ -157,7 +158,7 @@ int main(){
 			lastStates[i][j]=1;
 			dataInCores[i][j] = lastSentData;
 			lastSentData++;
-            printf("Data Sent->%d Cores->%d,%d\n",lastSentData,i,j);
+            //printf("Data Sent->%d Cores->%d,%d\n",lastSentData,i,j);
 			//see if needs to read data
 		}else if(readReady == 0 && lastStates[i][j]==1){
 			//read data
@@ -168,9 +169,8 @@ int main(){
 			lastStates[i][j]=0;
 			receivedData++;
 
-            printf("Data Received->%d Core->%d %d\n",dataLocation+1,i,j);
-			if(receivedData >= DATA_TO_SEND-3){
-                usleep(20000);
+            //printf("Data Received->%d Core->%d %d\n",dataLocation+1,i,j);
+			if(receivedData >= DATA_TO_SEND-1){
 				break;
 			}
 		}
@@ -182,14 +182,19 @@ int main(){
 
 	}
 
+    //END OF TIME MEASUREMENT
+    gettimeofday(&endTime,NULL);
+    timediff = endTime.tv_sec*1000000+endTime.tv_usec - timediff;
+    double timeInSeconds = timediff;
+    timeInSeconds /=1000000;
+    printf("time:%g\n",timeInSeconds);
+
 
     for(i=0; i<DATA_SIZE; i++){
-        //originalData[i] = answer[0][i];
         fprintf(file,"0x%04x,",answer[0][i]);
     }
     fprintf(file,"\n");
     for(i=0; i<DATA_SIZE; i++){
-        //originalData[i] = answer[0][i];
         fprintf(file,"0x%04x,",originalData[i]);
     }
     fprintf(file,"\n");
@@ -211,7 +216,7 @@ int main(){
         }
     }
 
-	//END OF TIME MEASUREMENT
+
 
 
 	//-------------------------DUMP MEMORY -----------------------------

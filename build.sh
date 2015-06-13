@@ -32,3 +32,5 @@ e-gcc -T ${ELDF} eMain.c -o Debug/epiphanyProgram.elf -le-lib -lm
 # Convert ebinary to SREC file
 e-objcopy --srec-forceS3 --output-target srec Debug/epiphanyProgram.elf Debug/epiphanyProgram.srec
 
+# Reset all cores for safety on next run
+e-reset
